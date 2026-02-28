@@ -1,0 +1,9 @@
+<section class="driver-manager-page" *ngIf="vm$ | async as vm">
+  <app-airport-driver-scheduler
+    [data]="vm.data"
+    [updates]="vm.updates"
+    [resources]="vm.resources"
+    [user_preferences]="vm.user_preferences"
+    [color_rules]="vm.color_rules"
+  ></app-airport-driver-scheduler>
+</section>
