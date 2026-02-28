@@ -3,8 +3,8 @@ import {
   Component,
   ElementRef,
   Input,
+  AfterViewInit,
   OnChanges,
-  OnInit,
   SimpleChanges,
   ViewChild
 } from '@angular/core';
@@ -45,24 +45,25 @@ import {
     { provide: TIMEZONE_STRATEGY, useClass: DefaultTimezoneStrategy }
   ]
 })
-export class AirportDriverSchedulerComponent implements OnInit, OnChanges {
+export class AirportDriverSchedulerComponent implements AfterViewInit, OnChanges {
   @Input() data!: SchedulerInitData;
   @Input() updates!: Observable<WebSocketUpdate>;
   @Input() resources!: readonly DriverResource[];
   @Input() user_preferences!: UserPreferences;
   @Input() color_rules!: ColorRules;
 
-  @ViewChild('mainSchedulerHost', { static: true })
+  @ViewChild('mainSchedulerHost', { static: false })
   mainSchedulerHost!: ElementRef<HTMLElement>;
 
-  @ViewChild('holdSchedulerHost', { static: true })
+  @ViewChild('holdSchedulerHost', { static: false })
   holdSchedulerHost!: ElementRef<HTMLElement>;
 
   readonly vm$ = this.facade.vm$;
+  private initialized = false;
 
   constructor(private readonly facade: SchedulerFacadeService) {}
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
     this.assertRequiredInputs();
 
     this.facade.initialize(
@@ -74,9 +75,15 @@ export class AirportDriverSchedulerComponent implements OnInit, OnChanges {
       this.mainSchedulerHost.nativeElement,
       this.holdSchedulerHost.nativeElement
     );
+
+    this.initialized = true;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (!this.initialized) {
+      return;
+    }
+
     if (changes['resources']?.currentValue && this.resources) {
       this.facade.updateResources(this.resources);
     }
