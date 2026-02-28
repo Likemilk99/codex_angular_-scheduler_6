@@ -1,0 +1,21 @@
+<section class="scheduler-layout" aria-label="Airport Driver Scheduler">
+  <header class="scheduler-layout__header">
+    <h2>Airport Driver Shift Scheduler</h2>
+    <div class="scheduler-layout__meta" *ngIf="vm$ | async as vm">
+      <span>Timezone: {{ vm.timezone }}</span>
+      <span>Period: {{ vm.range.from }} — {{ vm.range.to }}</span>
+    </div>
+  </header>
+
+  <div class="scheduler-layout__content">
+    <aside class="scheduler-layout__hold">
+      <h3>HOLD Scheduler</h3>
+      <div #holdSchedulerHost class="scheduler-host"></div>
+    </aside>
+
+    <main class="scheduler-layout__main">
+      <h3>MAIN Scheduler (Timeline)</h3>
+      <div #mainSchedulerHost class="scheduler-host"></div>
+    </main>
+  </div>
+</section>
