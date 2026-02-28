@@ -26,11 +26,12 @@ interface SchedulerFactory {
 }
 
 declare const Scheduler: SchedulerInstance & SchedulerFactory;
+declare const scheduler: SchedulerInstance & SchedulerFactory;
 
 @Injectable()
 export class DhtmlxSchedulerAdapter {
-  private readonly mainScheduler = Scheduler.getSchedulerInstance?.() ?? Scheduler;
-  private readonly holdScheduler = Scheduler.getSchedulerInstance?.() ?? Scheduler;
+  private readonly mainScheduler = this.createSchedulerInstance();
+  private readonly holdScheduler = this.createSchedulerInstance();
   private mainDragHandlerId: string | null = null;
   private holdDragHandlerId: string | null = null;
 
@@ -145,5 +146,41 @@ export class DhtmlxSchedulerAdapter {
       }
     }
     return new Date().toISOString();
+  }
+
+  private createSchedulerInstance(): SchedulerInstance {
+    const runtime = globalThis as Record<string, unknown>;
+    const candidates: readonly unknown[] = [runtime['Scheduler'], runtime['scheduler'], Scheduler, scheduler];
+
+    for (const candidate of candidates) {
+      if (!this.isSchedulerInstance(candidate)) {
+        continue;
+      }
+
+      const instanceFactory = candidate as SchedulerFactory;
+      const instance = instanceFactory.getSchedulerInstance?.() ?? candidate;
+      if (this.isSchedulerInstance(instance)) {
+        return instance;
+      }
+    }
+
+    throw new Error('DHTMLX scheduler runtime is not available.');
+  }
+
+  private isSchedulerInstance(value: unknown): value is SchedulerInstance {
+    if (typeof value !== 'object' || value === null) {
+      return false;
+    }
+
+    const schedulerCandidate = value as Partial<SchedulerInstance>;
+    return (
+      typeof schedulerCandidate.init === 'function' &&
+      typeof schedulerCandidate.clearAll === 'function' &&
+      typeof schedulerCandidate.parse === 'function' &&
+      typeof schedulerCandidate.attachEvent === 'function' &&
+      typeof schedulerCandidate.detachEvent === 'function' &&
+      typeof schedulerCandidate.config === 'object' &&
+      schedulerCandidate.config !== null
+    );
   }
 }
