@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "npm run start:app",
+    "start": "ng serve",
     "build": "ng build",
     "test": "ng test",
-    "mock-server": "node mock-server/server.js",
-    "start:app": "ng serve"
+    "mock-server": "node mock-server/server.js"
   },
   "dependencies": {
     "@angular/animations": "14.2.0",
