@@ -46,11 +46,11 @@ import {
   ]
 })
 export class AirportDriverSchedulerComponent implements OnInit, OnChanges {
-  @Input({ required: true }) data!: SchedulerInitData;
-  @Input({ required: true }) updates!: Observable<WebSocketUpdate>;
-  @Input({ required: true }) resources!: readonly DriverResource[];
-  @Input({ required: true }) user_preferences!: UserPreferences;
-  @Input({ required: true }) color_rules!: ColorRules;
+  @Input() data!: SchedulerInitData;
+  @Input() updates!: Observable<WebSocketUpdate>;
+  @Input() resources!: readonly DriverResource[];
+  @Input() user_preferences!: UserPreferences;
+  @Input() color_rules!: ColorRules;
 
   @ViewChild('mainSchedulerHost', { static: true })
   mainSchedulerHost!: ElementRef<HTMLElement>;
@@ -63,6 +63,8 @@ export class AirportDriverSchedulerComponent implements OnInit, OnChanges {
   constructor(private readonly facade: SchedulerFacadeService) {}
 
   ngOnInit(): void {
+    this.assertRequiredInputs();
+
     this.facade.initialize(
       this.data,
       this.resources,
@@ -72,21 +74,26 @@ export class AirportDriverSchedulerComponent implements OnInit, OnChanges {
       this.mainSchedulerHost.nativeElement,
       this.holdSchedulerHost.nativeElement
     );
-
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['resources']?.currentValue) {
+    if (changes['resources']?.currentValue && this.resources) {
       this.facade.updateResources(this.resources);
     }
 
-    if (changes['color_rules']?.currentValue) {
+    if (changes['color_rules']?.currentValue && this.color_rules) {
       this.facade.updateColorRules(this.color_rules);
     }
 
-    if (changes['user_preferences']?.currentValue) {
+    if (changes['user_preferences']?.currentValue && this.user_preferences) {
       this.facade.updateTimezone(this.user_preferences.timezone);
     }
   }
 
+  private assertRequiredInputs(): void {
+    if (!this.data || !this.updates || !this.resources || !this.user_preferences || !this.color_rules) {
+      throw new Error('AirportDriverSchedulerComponent requires data, updates, resources, user_preferences, color_rules inputs.');
+    }
+  }
 }
+
